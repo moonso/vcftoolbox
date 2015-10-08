@@ -2,7 +2,7 @@
 
 import logging
 
-logging = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def get_variant_dict(variant_line, header_line):
     """Parse a variant line
@@ -15,10 +15,17 @@ def get_variant_dict(variant_line, header_line):
         Returns:
             variant_dict (dict): A variant dictionary
     """
-    logger.debug("Building variant dict from variant line {0} and header\"
+    logger.debug("Building variant dict from variant line {0} and header"\
     " line {1}".format(variant_line, '\t'.join(header_line)))
     
-    return dict(zip(header_line, variant_line.rstrip().split('\t')))
+    splitted_line = variant_line.rstrip().split('\t')
+    if len(splitted_line) != len(header_line):
+        logger.info('\t'.join(header_line))
+        logger.info('\t'.join(splitted_line))
+        raise SyntaxError("Length of variant line differs from length of"\
+                            " header line")
+    
+    return dict(zip(header_line, splitted_line))
 
 def get_info_dict(info_line):
     """Parse a info field of a variant

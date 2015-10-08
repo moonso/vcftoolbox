@@ -65,6 +65,44 @@ def get_vep_dict(vep_string, vep_header):
 ```
 
 ```python
+def replace_vcf_info(keyword, annotation, variant_line=None, variant_dict=None):
+    """Replace the information of a info field of a vcf variant line or a 
+        variant dict.
+    
+    Arguments:
+        variant_line (str): A vcf formatted variant line
+        variant_dict (dict): A variant dictionary
+        keyword (str): The info field key
+        annotation (str): If the annotation is a key, value pair
+                          this is the string that represents the value
+    
+    Returns:
+        variant_line (str): A annotated variant line
+```
+
+```python
+def add_vcf_info(keyword, variant_line=None, variant_dict=None, annotation=None):
+    """
+    Add information to the info field of a vcf variant line.
+    
+    Arguments:
+        keyword (str): The info field key
+        variant_line (str): A vcf formatted variant line
+        annotation (str): If the annotation is a key, value pair
+                          this is the string that represents the value
+    
+    Returns:
+        fixed_variant : str if variant line, or dict if variant_dict
+    """
+```
+
+
+## Classes ##
+
+### Genotype ###
+
+
+```python
 class Genotype(object):
     """Holds information about a vcf genotype
     
@@ -93,6 +131,9 @@ class Genotype(object):
     
     """
 ```
+
+### HeaderParser ###
+
 
 ```python
 class HeaderParser(object):

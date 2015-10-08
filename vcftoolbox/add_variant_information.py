@@ -14,8 +14,8 @@ from __future__ import print_function
 import logging
 
 def replace_vcf_info(keyword, annotation, variant_line=None, variant_dict=None):
-    """Replace the information of a info field of a vcf variant line.
-    
+    """Replace the information of a info field of a vcf variant line or a 
+        variant dict.
     
     Arguments:
         variant_line (str): A vcf formatted variant line
