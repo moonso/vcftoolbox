@@ -50,7 +50,7 @@ def get_info_dict(info_line):
     
     return variant_info
 
-def get_variant_id(variant_dict):
+def get_variant_id(variant_dict=None, variant_line=None):
     """Build a variant id
     
         The variant id is a string made of CHROM_POS_REF_ALT
@@ -62,11 +62,25 @@ def get_variant_id(variant_dict):
             variant_id (str)
     """
     
+    if variant_dict:
+        chrom = variant_dict['CHROM']
+        position = variant_dict['POS']
+        ref = variant_dict['REF']
+        alt = variant_dict['ALT']
+    elif variant_line:
+        splitted_line = line.rstrip().split('\t')
+        chrom = splitted_line[0]
+        position = splitted_line[1]
+        ref = variant_dict[3]
+        alt = variant_dict[4]
+    else:
+        raise Exception("Have to provide variant dict or variant line")
+    
     return '_'.join([
-        variant_dict['CHROM'],
-        variant_dict['POS'],
-        variant_dict['REF'],
-        variant_dict['ALT'],
+        chrom,
+        position,
+        ref,
+        alt,
     ])
 
 def get_vep_dict(vep_string, vep_header):
