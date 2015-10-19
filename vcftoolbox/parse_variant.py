@@ -71,8 +71,8 @@ def get_variant_id(variant_dict=None, variant_line=None):
         splitted_line = variant_line.rstrip().split('\t')
         chrom = splitted_line[0]
         position = splitted_line[1]
-        ref = variant_dict[3]
-        alt = variant_dict[4]
+        ref = splitted_line[3]
+        alt = splitted_line[4]
     else:
         raise Exception("Have to provide variant dict or variant line")
     
