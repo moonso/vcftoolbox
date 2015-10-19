@@ -68,7 +68,7 @@ def get_variant_id(variant_dict=None, variant_line=None):
         ref = variant_dict['REF']
         alt = variant_dict['ALT']
     elif variant_line:
-        splitted_line = line.rstrip().split('\t')
+        splitted_line = variant_line.rstrip().split('\t')
         chrom = splitted_line[0]
         position = splitted_line[1]
         ref = variant_dict[3]
