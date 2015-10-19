@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/moonso/vcftoolbox.svg)](https://travis-ci.org/moonso/vcftoolbox)
+
+
 Set of tools for working with vcf files and variants.
 
 Thanks to [pyvcf](https://github.com/jamescasbon/PyVCF) for code base in header parser.
