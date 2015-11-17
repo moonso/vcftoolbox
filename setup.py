@@ -4,6 +4,11 @@ except ImportError:
     from distutils.core import setup
 import pkg_resources
 
+# Shortcut for building/publishing to Pypi
+if sys.argv[-1] == 'publish':
+    os.system('python setup.py sdist bdist_wheel upload')
+    sys.exit()
+
 # For making things look nice on pypi:
 try:
     import pypandoc
@@ -12,7 +17,7 @@ except (IOError, ImportError, RuntimeError):
     long_description = 'Tools for manipulating and parsing vcf files'
 
 setup(name='vcftoolbox',
-    version='0.1.4',
+    version='0.1.5',
     description='Tools for manipulating and parsing vcf files',
     author = 'Mans Magnusson',
     author_email = 'mans.magnusson@scilifelab.se',
