@@ -7,3 +7,4 @@ get_vep_dict)
 from .add_variant_information import (replace_vcf_info, add_vcf_info)
 from .prints import (print_headers, print_variant)
 from .get_file_handle import get_vcf_handle
+from .get_header import get_vcf_header
