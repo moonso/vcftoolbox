@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def get_variant_dict(variant_line, header_line):
+def get_variant_dict(variant_line, header_line=None):
     """Parse a variant line
         
         Split a variant line and map the fields on the header columns
@@ -15,11 +15,15 @@ def get_variant_dict(variant_line, header_line):
         Returns:
             variant_dict (dict): A variant dictionary
     """
+    if not header_line:
+        logger.debug("No header line, use only first 8 mandatory fields")
+        header_line = ['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO']
+    
     logger.debug("Building variant dict from variant line {0} and header"\
     " line {1}".format(variant_line, '\t'.join(header_line)))
     
     splitted_line = variant_line.rstrip().split('\t')
-    if len(splitted_line) != len(header_line):
+    if len(splitted_line) < len(header_line):
         logger.info('\t'.join(header_line))
         logger.info('\t'.join(splitted_line))
         raise SyntaxError("Length of variant line differs from length of"\
@@ -83,7 +87,7 @@ def get_variant_id(variant_dict=None, variant_line=None):
         alt,
     ])
 
-def get_vep_dict(vep_string, vep_header):
+def get_vep_dict(vep_string, vep_header, allele=None):
     """Make the vep annotation into a dictionary
     
         This dictionary will have the alleles as keys and a list of 
@@ -92,6 +96,7 @@ def get_vep_dict(vep_string, vep_header):
         Args:
             vep_list (string): A string with the CSQ annotation
             vep_header (list): A list with the vep header
+            allele (str): The allele that is annotated
         
         Return:
             vep_dict (dict): A vep dict as described above
@@ -101,7 +106,9 @@ def get_vep_dict(vep_string, vep_header):
     vep_dict = {}
     for vep_annotation in vep_string.split(','):
         inner_dict = dict(zip(vep_header, vep_annotation.split('|')))
-        allele = inner_dict['Allele']
+        if 'Allele' in inner_dict:
+            allele = inner_dict['Allele']
+        
         if allele in vep_dict:
             vep_dict[allele].append(inner_dict)
         else:
