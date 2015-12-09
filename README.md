@@ -51,18 +51,20 @@ def get_variant_id(variant_dict):
 ```
 
 ```python
-def get_vep_dict(vep_string, vep_header):
-    """Make the vep annotation into a dictionary
+def get_vep_info(vep_string, vep_header):
+    """Make the vep annotations into a dictionaries
     
-        This dictionary will have the alleles as keys and a list of 
-        dictionaries with vep annotations as values.
-        
+        A vep dictionary will have the vep column names as keys and 
+        the vep annotations as values.
+        The dictionaries are stored in a list
+
         Args:
             vep_list (string): A string with the CSQ annotation
             vep_header (list): A list with the vep header
+            allele (str): The allele that is annotated
         
         Return:
-            vep_dict (dict): A vep dict as described above
+            vep_annotations (list): A list of vep dicts
     
     """
 ```
