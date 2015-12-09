@@ -87,31 +87,26 @@ def get_variant_id(variant_dict=None, variant_line=None):
         alt,
     ])
 
-def get_vep_dict(vep_string, vep_header, allele=None):
-    """Make the vep annotation into a dictionary
+def get_vep_info(vep_string, vep_header):
+    """Make the vep annotations into a dictionaries
     
-        This dictionary will have the alleles as keys and a list of 
-        dictionaries with vep annotations as values.
-        
+        A vep dictionary will have the vep column names as keys and 
+        the vep annotations as values.
+        The dictionaries are stored in a list
+
         Args:
             vep_list (string): A string with the CSQ annotation
             vep_header (list): A list with the vep header
             allele (str): The allele that is annotated
         
         Return:
-            vep_dict (dict): A vep dict as described above
+            vep_annotations (list): A list of vep dicts
     
     """
     
-    vep_dict = {}
-    for vep_annotation in vep_string.split(','):
-        inner_dict = dict(zip(vep_header, vep_annotation.split('|')))
-        if 'Allele' in inner_dict:
-            allele = inner_dict['Allele']
-        
-        if allele in vep_dict:
-            vep_dict[allele].append(inner_dict)
-        else:
-            vep_dict[allele] = [inner_dict]
+    vep_annotation = [
+        dict(zip(vep_header, vep_annotation.split('|'))) 
+        for vep_annotation in vep_string.split(',')
+    ]
     
-    return vep_dict
+    return vep_annotation
