@@ -74,22 +74,30 @@ class Genotype(object):
         """Initialize a genotype object
         
         Arguments:
-            GT (str): The genotype call in vcf format. eg. 0/1. Default './.'
-            AD (str): Allele depths for each observed allele. Default '.,.'
-            DP (str): Total read depth for this variant. Default '0'
-            GQ (str): Phred scaled genotype quality for this variant call. 
-                      Default '0'
-            PL (str): The likelihoods for the different possible calls for this variant. 
-                      Default None
-        
+            GT(str): The genotype call in vcf format. eg. 0/1. Default './.'
+            AD(str): Allele depths for each observed allele. Default '.,.'
+            DP(str): Total read depth for this variant. Default '0'
+            GQ(str): Phred scaled genotype quality for this variant call. 
+                     Default '0'
+            PL(str): The likelihoods for the different possible calls for this variant. 
+                     Default None
+            PL(str): The likelihoods for the different possible calls for this variant. 
+                     Default None
+            SU(str): Number of pieces of evidence supporting the variant
+            PE(str): Number of paired-end reads supporting the variant
+            SR(str): Number of split reads supporting the variant
         """
-        super(Genotype, self).__init__()        
+        super(Genotype, self).__init__()
         # These are the different genotypes:
         GT = kwargs.get('GT', './.')
         AD = kwargs.get('AD', '.,.')
         DP = kwargs.get('DP', '0')
         GQ = kwargs.get('GQ', '0')
         PL = kwargs.get('PL', None)
+        SU = kwargs.get('SU', '0')
+        PE = kwargs.get('PE', '0')
+        SR = kwargs.get('PL', '0')
+        
         self.heterozygote = False
         self.allele_depth = False
         self.homo_alt = False
@@ -100,6 +108,11 @@ class Genotype(object):
         self.depth_of_coverage = 0
         self.quality_depth = 0
         self.genotype_quality = 0
+        self.supporting_evidence = int(SU)
+        #Paired end support
+        self.pe_support = int(PE)
+        #Split read support
+        self.sr_support = int(SR)
         
         #Check phasing
         if '|' in GT:
@@ -157,6 +170,7 @@ class Genotype(object):
                 self.phred_likelihoods = [int(score) for score in PL.split(',')]
             except ValueError:
                 pass
+        
         
     def __str__(self):
         """Specifies what will be printed when printing the object."""
