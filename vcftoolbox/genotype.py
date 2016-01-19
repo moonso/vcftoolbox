@@ -96,7 +96,7 @@ class Genotype(object):
         PL = kwargs.get('PL', None)
         SU = kwargs.get('SU', '0')
         PE = kwargs.get('PE', '0')
-        SR = kwargs.get('PL', '0')
+        SR = kwargs.get('SR', '0')
         
         self.heterozygote = False
         self.allele_depth = False
