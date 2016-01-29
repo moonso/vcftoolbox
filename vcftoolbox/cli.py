@@ -25,8 +25,11 @@ logger = logging.getLogger(__name__)
                     type=click.File('w'),
                     help='Specify the path to a file where results should be stored.'
 )
+@click.option('-s', '--silent',
+    is_flag=True
+)
 @click.pass_context
-def cli(ctx, vcf, verbose, outfile):
+def cli(ctx, vcf, verbose, outfile, silent):
     """Simple vcf operations"""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
@@ -51,6 +54,7 @@ def cli(ctx, vcf, verbose, outfile):
 
     ctx.handle = itertools.chain([line], handle)
     ctx.outfile = outfile
+    ctx.silent = silent
     
 
 @cli.command()
@@ -63,6 +67,7 @@ def delete_info(ctx, info):
     head = ctx.parent.head
     vcf_handle = ctx.parent.handle
     outfile = ctx.parent.outfile
+    silent = ctx.parent.silent
     
     if not info:
         logger.error("No info provided")
@@ -74,9 +79,23 @@ def delete_info(ctx, info):
     
     head.remove_header(info)
     
-    print_headers(head, outfile=outfile, silent=False)
+    print_headers(head, outfile=outfile, silent=silent)
     
     for line in vcf_handle:
         line = line.rstrip()
         new_line = remove_vcf_info(keyword=info, variant_line=line)
-        print_variant(variant_line=new_line, outfile=outfile, silent=False)
+        print_variant(variant_line=new_line, outfile=outfile, silent=silent)
+
+@cli.command()
+@click.pass_context
+def print_variants(ctx):
+    """Delete a info field from all variants in a vcf"""
+    head = ctx.parent.head
+    vcf_handle = ctx.parent.handle
+    outfile = ctx.parent.outfile
+    silent = ctx.parent.silent
+    
+    print_headers(head, outfile=outfile, silent=silent)
+    
+    for line in vcf_handle:
+        print_variant(variant_line=line, outfile=outfile, silent=silent)
