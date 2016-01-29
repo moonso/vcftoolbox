@@ -1,3 +1,4 @@
+<<<<<<< Local Changes
 from __future__ import print_function
 
 import sys
@@ -179,10 +180,9 @@ class HeaderParser(object):
                 self.vep_columns = info_line.get('Format', '').split('|')
 
             if info_line['ID'] == 'ANN':
-                # print(info_line.split(':')[-1])
-                print([annotation.strip("' ") for annotation in info_line.get('Description', '').split(':')[-1].split('|')])
-                print(info_line.get('Format', '').split('|'))
-                self.snpeff_columns = info_line.get('Format', '').split('|')
+                self.snpeff_columns = [
+                    annotation.strip("' ") for annotation in 
+                    info_line.get('Description', '').split(':')[-1].split('|')]
             
             self.info_dict[match.group('id')] = line
         
