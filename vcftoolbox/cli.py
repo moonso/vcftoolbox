@@ -7,7 +7,7 @@ import itertools
 import click
 
 from . import (get_vcf_handle, HeaderParser, print_headers, remove_vcf_info,
-print_variant)
+print_variant, get_variant_dict, get_info_dict, get_snpeff_info)
 from .log import LEVELS, configure_stream
 
 logger = logging.getLogger(__name__)
@@ -87,8 +87,12 @@ def delete_info(ctx, info):
         print_variant(variant_line=new_line, outfile=outfile, silent=silent)
 
 @cli.command()
+@click.option('--snpeff',
+    is_flag=True,
+    help="Print the snpeff annotations"
+)
 @click.pass_context
-def print_variants(ctx):
+def variants(ctx, snpeff):
     """Delete a info field from all variants in a vcf"""
     head = ctx.parent.head
     vcf_handle = ctx.parent.handle
@@ -99,3 +103,22 @@ def print_variants(ctx):
     
     for line in vcf_handle:
         print_variant(variant_line=line, outfile=outfile, silent=silent)
+        if snpeff:
+            variant_dict =  get_variant_dict(
+                variant_line = line,
+                header_line = head.header
+            )
+            #Create a info dict:
+            info_dict = get_info_dict(
+                info_line = variant_dict['INFO']
+            )
+            snpeff_string = info_dict.get('ANN')
+
+
+            if snpeff_string:
+                #Get the snpeff annotations
+                snpeff_info = get_snpeff_info(
+                    snpeff_string = snpeff_string,
+                    snpeff_header = head.snpeff_columns
+                )
+                print(snpeff_info)

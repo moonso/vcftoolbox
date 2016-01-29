@@ -40,7 +40,7 @@ except (IOError, ImportError, RuntimeError):
     long_description = 'Tools for manipulating and parsing vcf files'
 
 setup(name='vcftoolbox',
-    version='1.2',
+    version='1.2.1',
     description='Tools for manipulating and parsing vcf files',
     author = 'Mans Magnusson',
     author_email = 'mans.magnusson@scilifelab.se',
