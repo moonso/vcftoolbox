@@ -48,6 +48,7 @@ class HeaderParser(object):
             line_counter = 0
             individuals = []
             vep_columns = []
+            snpeff_columns = []
             info_pattern
             filter_pattern
             contig_pattern
@@ -106,6 +107,7 @@ class HeaderParser(object):
         self.line_counter = 0
         self.individuals = []
         self.vep_columns = []
+        self.snpeff_columns = []
         self.info_pattern = re.compile(r'''\#\#INFO=<
             ID=(?P<id>[^,]+),
             Number=(?P<number>-?\d+|\.|[AGR]),
@@ -175,6 +177,12 @@ class HeaderParser(object):
             # Store the vep columns:
             if info_line['ID'] == 'CSQ':
                 self.vep_columns = info_line.get('Format', '').split('|')
+
+            if info_line['ID'] == 'ANN':
+                # print(info_line.split(':')[-1])
+                print([annotation.strip("' ") for annotation in info_line.get('Description', '').split(':')[-1].split('|')])
+                print(info_line.get('Format', '').split('|'))
+                self.snpeff_columns = info_line.get('Format', '').split('|')
             
             self.info_dict[match.group('id')] = line
         
