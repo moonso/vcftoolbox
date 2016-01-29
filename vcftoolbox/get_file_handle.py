@@ -22,7 +22,7 @@ def get_vcf_handle(fsock=None, infile=None):
                 vcf = sys.stdin
         
         else:
-            logger.info("Reading vcf form file {0}".format(infile))
+            logger.info("Reading vcf from file {0}".format(infile))
             file_name, file_extension = os.path.splitext(infile)
             if file_extension == '.gz':
                 logger.debug("Vcf is zipped")

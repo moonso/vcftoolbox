@@ -2,8 +2,9 @@ from __future__ import print_function
 
 import sys
 import re
+import logging
 
-from logging import getLogger
+logger = logging.getLogger(__name__)
 
 if sys.version_info < (2, 7):
     from ordereddict import OrderedDict
@@ -70,7 +71,6 @@ class HeaderParser(object):
     """
     def __init__(self):
         super(HeaderParser, self).__init__()
-        self.logger = getLogger(__name__)
         self.info_lines=[]
         self.info_dict=OrderedDict()
         #This is a dictionary cantaining specific information about the info fields
@@ -137,15 +137,15 @@ class HeaderParser(object):
     def parse_meta_data(self, line):
         """Parse a vcf metadataline"""
         line = line.rstrip()
-        self.logger.debug("Parsing metadata line:{0}".format(line))
+        logger.debug("Parsing metadata line:{0}".format(line))
         line_info = line[2:].split('=')
         match = False
         
         if line_info[0] == 'fileformat':
-            self.logger.debug("Parsing fileformat")
+            logger.debug("Parsing fileformat")
             try:
                 self.fileformat = line_info[1]
-                self.logger.debug("Found fileformat {0}".format(self.fileformat))
+                logger.debug("Found fileformat {0}".format(self.fileformat))
             except IndexError:
                 raise SyntaxError("fileformat must have a value")
         
@@ -240,6 +240,28 @@ class HeaderParser(object):
             self.header = line[1:].rstrip().split()
         self.individuals = self.header[9:]
     
+    def remove_header(self, name):
+        """Remove a field from the header"""
+        if name in self.info_dict:
+            self.info_dict.pop(name)
+            logger.info("Removed '{0}' from INFO".format(name))
+        if name in self.filter_dict:
+            self.filter_dict.pop(name)
+            logger.info("Removed '{0}' from FILTER".format(name))
+        if name in self.format_dict:
+            self.format_dict.pop(name)
+            logger.info("Removed '{0}' from FORMAT".format(name))
+        if name in self.contig_dict:
+            self.contig_dict.pop(name)
+            logger.info("Removed '{0}' from CONTIG".format(name))
+        if name in self.alt_dict:
+            self.alt_dict.pop(name)
+            logger.info("Removed '{0}' from ALT".format(name))
+        if name in self.other_dict:
+            self.other_dict.pop(name)
+            logger.info("Removed '{0}' from OTHER".format(name))
+        return
+    
     def print_header(self):
         """Returns a list with the header lines if proper format"""
         lines_to_print = []
@@ -272,7 +294,7 @@ class HeaderParser(object):
         
         """
         self.fileformat = fileformat
-        self.logger.info("Adding fileformat to vcf: {0}".format(fileformat))
+        logger.info("Adding fileformat to vcf: {0}".format(fileformat))
         return
 
     def add_meta_line(self, key, value):
@@ -289,7 +311,7 @@ class HeaderParser(object):
         meta_line = '##{0}={1}'.format(
             key, value
         )
-        self.logger.info("Adding meta line to vcf: {0}".format(meta_line))
+        logger.info("Adding meta line to vcf: {0}".format(meta_line))
         self.parse_meta_data(meta_line)
         return
 
@@ -307,7 +329,7 @@ class HeaderParser(object):
         info_line = '##INFO=<ID={0},Number={1},Type={2},Description="{3}">'.format(
             info_id, number, entry_type, description
         )
-        self.logger.info("Adding info line to vcf: {0}".format(info_line))
+        logger.info("Adding info line to vcf: {0}".format(info_line))
         self.parse_meta_data(info_line)
         return
 
@@ -323,7 +345,7 @@ class HeaderParser(object):
         filter_line = '##FILTER=<ID={0},Description="{1}">'.format(
             filter_id, description
         )
-        self.logger.info("Adding filter line to vcf: {0}".format(filter_line))
+        logger.info("Adding filter line to vcf: {0}".format(filter_line))
         self.parse_meta_data(filter_line)
         return
 
@@ -341,7 +363,7 @@ class HeaderParser(object):
         format_line = '##FORMAT=<ID={0},Number={1},Type={2},Description="{3}">'.format(
             format_id, number, entry_type, description
         )
-        self.logger.info("Adding format line to vcf: {0}".format(format_line))
+        logger.info("Adding format line to vcf: {0}".format(format_line))
         self.parse_meta_data(format_line)
         return
 
@@ -357,7 +379,7 @@ class HeaderParser(object):
         alt_line = '##ALT=<ID={0},Description="{1}">'.format(
             alt_id, description
         )
-        self.logger.info("Adding alternative allele line to vcf: {0}".format(alt_line))
+        logger.info("Adding alternative allele line to vcf: {0}".format(alt_line))
         self.parse_meta_data(alt_line)
         return
 
@@ -373,7 +395,7 @@ class HeaderParser(object):
         contig_line = '##contig=<ID={0},length={1}>'.format(
             contig_id, length
         )
-        self.logger.info("Adding contig line to vcf: {0}".format(contig_line))
+        logger.info("Adding contig line to vcf: {0}".format(contig_line))
         self.parse_meta_data(contig_line)
         return
 
