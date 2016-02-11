@@ -147,9 +147,9 @@ class Genotype(object):
         self.ref_depth = 0
         self.alt_depth = 0
         
-        if RO:
+        if RO and RO != '.':
             self.ref_depth = int(RO)
-        if AO:
+        if AO and AO != '.':
             self.alt_depth = int(AO)
         
         allele_depths = AD.split(',')
