@@ -97,6 +97,10 @@ class Genotype(object):
         SU = kwargs.get('SU', '0')
         PE = kwargs.get('PE', '0')
         SR = kwargs.get('SR', '0')
+        #Referense allele observations(used by freebays for example)
+        RO = kwargs.get('RO')
+        #Alternative allele observations(used by freebays for example)
+        AO = kwargs.get('AO')
         
         self.heterozygote = False
         self.allele_depth = False
@@ -142,6 +146,11 @@ class Genotype(object):
         #Check the allele depth:
         self.ref_depth = 0
         self.alt_depth = 0
+        
+        if RO:
+            self.ref_depth = int(RO)
+        if AO:
+            self.alt_depth = int(AO)
         
         allele_depths = AD.split(',')
         

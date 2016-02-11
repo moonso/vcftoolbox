@@ -170,4 +170,27 @@ def test_phased_data():
     assert my_genotype.genotyped
     assert my_genotype.phased
 
+def test_freebays():
+    """
+    Try if the class van handle phased data. 
+    In this case a heterozygote.
+    """
+    fb_format = "GT:DP:RO:QR:AO:QA:GL"
+    gt_call = "0/1:15:12:352:3:126:-6.17418,0,-19.4464"
+    gt_dict = dict(zip(fb_format.split(':'), gt_call.split(':')))
+    freebayes_genotype = Genotype(**gt_dict)
+    assert freebayes_genotype.genotype == '0/1'# If asked about the genotype, it should still be on the same form.
+    assert freebayes_genotype.heterozygote
+    assert not freebayes_genotype.homo_ref
+    assert not freebayes_genotype.homo_alt
+    assert freebayes_genotype.has_variant
+    assert freebayes_genotype.allele_1 == '0'# If asked about the genotype, it should still be on the same form.
+    assert freebayes_genotype.allele_2 == '1'# If asked about the genotype, it should still be on the same form.
+    assert freebayes_genotype.genotyped
+    assert not freebayes_genotype.phased
+    assert freebayes_genotype.depth_of_coverage == 15
+    assert freebayes_genotype.alt_depth == 3
+    assert freebayes_genotype.ref_depth == 12
+    
+
     
