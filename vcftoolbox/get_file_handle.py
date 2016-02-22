@@ -13,13 +13,13 @@ def get_vcf_handle(fsock=None, infile=None):
     if (fsock or infile):
     
         if fsock:
-            if not infile and hasattr(fsock, 'name'):
-                logger.info("Reading vcf form stdin")
-                if sys.version_info < (3, 0):
-                    logger.info("Using codecs to read stdin")
-                    sys.stdin = getreader('utf-8')(fsock)
-                
-                vcf = sys.stdin
+            # if not infile and hasattr(fsock, 'name'):
+            logger.info("Reading vcf form stdin")
+            if sys.version_info < (3, 0):
+                logger.info("Using codecs to read stdin")
+                sys.stdin = getreader('utf-8')(fsock)
+            
+            vcf = sys.stdin
         
         else:
             logger.info("Reading vcf from file {0}".format(infile))

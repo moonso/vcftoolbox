@@ -36,7 +36,7 @@ def cli(ctx, vcf, verbose, outfile, silent):
     configure_stream(level=loglevel)
     
     if vcf == '-':
-        handle = get_vcf_handle(fsock=vcf)
+        handle = get_vcf_handle(fsock=sys.stdin)
     else:
         handle = get_vcf_handle(infile=vcf)
     
@@ -93,7 +93,7 @@ def delete_info(ctx, info):
 )
 @click.pass_context
 def variants(ctx, snpeff):
-    """Delete a info field from all variants in a vcf"""
+    """Print the variants in a vcf"""
     head = ctx.parent.head
     vcf_handle = ctx.parent.handle
     outfile = ctx.parent.outfile
@@ -121,4 +121,3 @@ def variants(ctx, snpeff):
                     snpeff_string = snpeff_string,
                     snpeff_header = head.snpeff_columns
                 )
-                print(snpeff_info)
