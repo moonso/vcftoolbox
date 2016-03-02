@@ -14,32 +14,32 @@ else:
 
 class HeaderParser(object):
     """Class for holding and manipulating vcf headers
-        
+
         Attributes:
             info_dict=OrderedDict()
             extra_info = {}
-        
+
             filter_lines=[]
             filter_dict=OrderedDict()
-        
+
             contig_lines=[]
             contig_dict=OrderedDict()
-        
+
             format_lines=[]
             format_dict=OrderedDict()
-        
+
             alt_lines=[]
             alt_dict=OrderedDict()
-        
+
             other_lines=[]
             other_dict=OrderedDict()
-        
+
             header=['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO']
-            header_keys={'info' : ['ID', 'Number', 'Type', 'Description'], 
-                           'form' : ['ID', 'Number', 'Type', 'Description'], 
+            header_keys={'info' : ['ID', 'Number', 'Type', 'Description'],
+                           'form' : ['ID', 'Number', 'Type', 'Description'],
                            'filt' : ['ID', 'Description'],
                            'alt' : ['ID', 'Description'],
-                           'contig' : ['ID', 'length']}
+                           'contig' : ['ID']}
             fileformat = None
             filedate = None
             reference = None
@@ -55,7 +55,7 @@ class HeaderParser(object):
             format_pattern
             alt_pattern
             meta_pattern
-        
+
         Methods:
             parse_meta_data(line)
             parse_header_line(line)
@@ -64,11 +64,11 @@ class HeaderParser(object):
             add_meta_linekey, value)
             add_info(info_id, number, entry_type, description)
             add_filter(filter_id, description)
-            add_format(format_id, number, entry_type, description)            
-            add_alt(alt_id, description)            
+            add_format(format_id, number, entry_type, description)
+            add_alt(alt_id, description)
             add_contig(contig_id, length)
-            add_version_tracking(info_id, version, date, command_line='')            
-            
+            add_version_tracking(info_id, version, date, command_line='')
+
     """
     def __init__(self):
         super(HeaderParser, self).__init__()
@@ -77,25 +77,25 @@ class HeaderParser(object):
         #This is a dictionary cantaining specific information about the info fields
         #It will have info name as key and then another dictionary with ID, Number, Type and Description
         self.extra_info = {}
-        
+
         self.filter_lines=[]
         self.filter_dict=OrderedDict()
-        
+
         self.contig_lines=[]
         self.contig_dict=OrderedDict()
-        
+
         self.format_lines=[]
         self.format_dict=OrderedDict()
-        
+
         self.alt_lines=[]
         self.alt_dict=OrderedDict()
-        
+
         self.other_lines=[]
         self.other_dict=OrderedDict()
-        
+
         self.header=['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO']
-        self.header_keys={'info' : ['ID', 'Number', 'Type', 'Description'], 
-                            'form' : ['ID', 'Number', 'Type', 'Description'], 
+        self.header_keys={'info' : ['ID', 'Number', 'Type', 'Description'],
+                            'form' : ['ID', 'Number', 'Type', 'Description'],
                             'filt' : ['ID', 'Description'],
                             'alt' : ['ID', 'Description'],
                             'contig' : ['ID', 'length']}
@@ -119,9 +119,8 @@ class HeaderParser(object):
             Description="(?P<desc>[^"]*)"
             >''', re.VERBOSE)
         self.contig_pattern = re.compile(r'''\#\#contig=<
-            ID=(?P<id>[^,]+),
-            .*
-            length=(?P<length>-?\d+)
+            ID=(?P<id>[^>,]+)
+            (,.*length=(?P<length>-?\d+))?
             .*
             >''', re.VERBOSE)
         self.format_pattern = re.compile(r'''\#\#FORMAT=<
@@ -135,14 +134,14 @@ class HeaderParser(object):
             Description="(?P<desc>[^"]*)"
             >''', re.VERBOSE)
         self.meta_pattern = re.compile(r'''##(?P<key>.+?)=(?P<val>.+)''')
-    
+
     def parse_meta_data(self, line):
         """Parse a vcf metadataline"""
         line = line.rstrip()
         logger.debug("Parsing metadata line:{0}".format(line))
         line_info = line[2:].split('=')
         match = False
-        
+
         if line_info[0] == 'fileformat':
             logger.debug("Parsing fileformat")
             try:
@@ -150,41 +149,41 @@ class HeaderParser(object):
                 logger.debug("Found fileformat {0}".format(self.fileformat))
             except IndexError:
                 raise SyntaxError("fileformat must have a value")
-        
+
         elif line_info[0] == 'INFO':
             match = self.info_pattern.match(line)
             if not match:
                 raise SyntaxError("One of the INFO lines is malformed:{0}".format(line))
-            
+
             matches = [
-                match.group('id'), match.group('number'), 
+                match.group('id'), match.group('number'),
                 match.group('type'), match.group('desc')
             ]
-            
+
             # extra_info is a dictionary to check the metadata about the INFO values:
             self.extra_info[matches[0]] = dict(
                 zip(self.header_keys['info'][1:], matches[1:])
             )
-            
+
             info_line = dict(list(zip(self.header_keys['info'],matches)))
-            
+
             if len(info_line['Description'].split('Format:')) > 1:
                 info_line['Format'] = [
                     info.strip() for info in info_line['Description'].split('Format:')
                 ][-1]
             self.info_lines.append(info_line)
-            
+
             # Store the vep columns:
             if info_line['ID'] == 'CSQ':
                 self.vep_columns = info_line.get('Format', '').split('|')
 
             if info_line['ID'] == 'ANN':
                 self.snpeff_columns = [
-                    annotation.strip("' ") for annotation in 
+                    annotation.strip("' ") for annotation in
                     info_line.get('Description', '').split(':')[-1].split('|')]
-            
+
             self.info_dict[match.group('id')] = line
-        
+
         elif line_info[0] == 'FILTER':
             match = self.filter_pattern.match(line)
             if not match:
@@ -194,59 +193,59 @@ class HeaderParser(object):
                 list(zip(self.header_keys['filt'],matches)))
             )
             self.filter_dict[match.group('id')] = line
-        
+
         elif line_info[0] == 'contig':
             match = self.contig_pattern.match(line)
             if not match:
                 print()
                 raise SyntaxError("One of the contig lines is malformed: {0}".format(line))
-            
+
             matches = [match.group('id'), match.group('length')]
             self.contig_lines.append(dict(
                 list(zip(self.header_keys['contig'],matches)))
             )
             self.contig_dict[match.group('id')] = line
-        
+
         elif line_info[0] == 'FORMAT':
             match = self.format_pattern.match(line)
             if not match:
                 raise SyntaxError("One of the FORMAT lines is malformed: {0}".format(line))
-            
+
             matches = [
-                match.group('id'), match.group('number'), 
+                match.group('id'), match.group('number'),
                 match.group('type'), match.group('desc')
             ]
             self.format_lines.append(dict(
                 list(zip(self.header_keys['form'],matches)))
             )
             self.format_dict[match.group('id')] = line
-        
+
         elif line_info[0] == 'ALT':
             match = self.alt_pattern.match(line)
             if not match:
                 raise SyntaxError("One of the ALT lines is malformed: {0}".format(line))
-            
+
             matches = [match.group('id'), match.group('desc')]
             self.alt_lines.append(dict(
                 list(zip(self.header_keys['alt'],matches)))
             )
             self.alt_dict[match.group('id')] = line
-        
+
         else:
             match = self.meta_pattern.match(line)
             if not match:
                 raise SyntaxError("One of the meta data lines is malformed: {0}".format(line))
-            
+
             self.other_lines.append({match.group('key'): match.group('val')})
             self.other_dict[match.group('key')] = line
-    
+
     def parse_header_line(self, line):
         """docstring for parse_header_line"""
         self.header = line[1:].rstrip().split('\t')
         if len(self.header) < 9:
             self.header = line[1:].rstrip().split()
         self.individuals = self.header[9:]
-    
+
     def remove_header(self, name):
         """Remove a field from the header"""
         if name in self.info_dict:
@@ -268,14 +267,14 @@ class HeaderParser(object):
             self.other_dict.pop(name)
             logger.info("Removed '{0}' from OTHER".format(name))
         return
-    
+
     def print_header(self):
         """Returns a list with the header lines if proper format"""
         lines_to_print = []
         lines_to_print.append('##fileformat='+self.fileformat)
         if self.filedate:
             lines_to_print.append('##fileformat='+self.fileformat)
-            
+
         for filt in self.filter_dict:
             lines_to_print.append(self.filter_dict[filt])
         for form in self.format_dict:
@@ -290,15 +289,15 @@ class HeaderParser(object):
             lines_to_print.append(self.other_dict[other])
         lines_to_print.append('#'+ '\t'.join(self.header))
         return lines_to_print
-    
+
 
     def add_fileformat(self, fileformat):
         """
         Add fileformat line to the header.
-        
+
         Arguments:
             fileformat (str): The id of the info line
-        
+
         """
         self.fileformat = fileformat
         logger.info("Adding fileformat to vcf: {0}".format(fileformat))
@@ -307,13 +306,13 @@ class HeaderParser(object):
     def add_meta_line(self, key, value):
         """
         Adds an arbitrary metadata line to the header.
-        
+
         This must be a key value pair
-        
+
         Arguments:
             key (str): The key of the metadata line
             value (str): The value of the metadata line
-        
+
         """
         meta_line = '##{0}={1}'.format(
             key, value
@@ -325,13 +324,13 @@ class HeaderParser(object):
     def add_info(self, info_id, number, entry_type, description):
         """
         Add an info line to the header.
-        
+
         Arguments:
             info_id (str): The id of the info line
             number (str): Integer or any of [A,R,G,.]
             entry_type (str): Any of [Integer,Float,Flag,Character,String]
             description (str): A description of the info line
-        
+
         """
         info_line = '##INFO=<ID={0},Number={1},Type={2},Description="{3}">'.format(
             info_id, number, entry_type, description
@@ -343,11 +342,11 @@ class HeaderParser(object):
     def add_filter(self, filter_id, description):
         """
         Add a filter line to the header.
-        
+
         Arguments:
             filter_id (str): The id of the filter line
             description (str): A description of the info line
-        
+
         """
         filter_line = '##FILTER=<ID={0},Description="{1}">'.format(
             filter_id, description
@@ -359,13 +358,13 @@ class HeaderParser(object):
     def add_format(self, format_id, number, entry_type, description):
         """
         Add a format line to the header.
-        
+
         Arguments:
             format_id (str): The id of the format line
             number (str): Integer or any of [A,R,G,.]
             entry_type (str): Any of [Integer,Float,Flag,Character,String]
             description (str): A description of the info line
-        
+
         """
         format_line = '##FORMAT=<ID={0},Number={1},Type={2},Description="{3}">'.format(
             format_id, number, entry_type, description
@@ -377,11 +376,11 @@ class HeaderParser(object):
     def add_alt(self, alt_id, description):
         """
         Add a alternative allele format field line to the header.
-        
+
         Arguments:
             alt_id (str): The id of the alternative line
             description (str): A description of the info line
-        
+
         """
         alt_line = '##ALT=<ID={0},Description="{1}">'.format(
             alt_id, description
@@ -393,11 +392,11 @@ class HeaderParser(object):
     def add_contig(self, contig_id, length):
         """
         Add a contig line to the header.
-        
+
         Arguments:
             contig_id (str): The id of the alternative line
             length (str): A description of the info line
-        
+
         """
         contig_line = '##contig=<ID={0},length={1}>'.format(
             contig_id, length
@@ -409,17 +408,17 @@ class HeaderParser(object):
 
     def add_version_tracking(self, info_id, version, date, command_line=''):
         """
-        Add a line with information about which software that was run and when 
+        Add a line with information about which software that was run and when
         to the header.
-        
+
         Arguments:
             info_id (str): The id of the info line
             version (str): The version of the software used
             date (str): Date when software was run
             command_line (str): The command line that was used for run
-        
+
         """
         other_line = '##Software=<ID={0},Version={1},Date="{2}",CommandLineOptions="{3}">'.format(
-            info_id, version, date, command_line) 
+            info_id, version, date, command_line)
         self.other_dict[info_id] = other_line
         return
