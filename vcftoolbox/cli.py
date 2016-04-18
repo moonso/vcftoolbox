@@ -3,11 +3,12 @@ import sys
 import os
 import logging
 import itertools
+import codecs
 
 import click
 
 from . import (get_vcf_handle, HeaderParser, print_headers, remove_vcf_info,
-print_variant, get_variant_dict, get_info_dict, get_snpeff_info)
+print_variant, get_variant_dict, get_info_dict, get_snpeff_info, sort_variants)
 from .log import LEVELS, configure_stream
 
 logger = logging.getLogger(__name__)
@@ -114,10 +115,24 @@ def variants(ctx, snpeff):
             )
             snpeff_string = info_dict.get('ANN')
 
-
             if snpeff_string:
                 #Get the snpeff annotations
                 snpeff_info = get_snpeff_info(
                     snpeff_string = snpeff_string,
                     snpeff_header = head.snpeff_columns
                 )
+
+@cli.command()
+@click.pass_context
+def sort(ctx):
+    """Sort the variants of a vcf file"""
+    head = ctx.parent.head
+    vcf_handle = ctx.parent.handle
+    outfile = ctx.parent.outfile
+    silent = ctx.parent.silent
+
+    print_headers(head, outfile=outfile, silent=silent)
+
+    for line in sort_variants(vcf_handle):
+        print_variant(variant_line=line, outfile=outfile, silent=silent)
+        
