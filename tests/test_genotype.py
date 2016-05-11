@@ -170,10 +170,9 @@ def test_phased_data():
     assert my_genotype.genotyped
     assert my_genotype.phased
 
-def test_freebays():
+def test_freebayes():
     """
-    Try if the class van handle phased data. 
-    In this case a heterozygote.
+    Test genotype call from freebayes
     """
     fb_format = "GT:DP:RO:QR:AO:QA:GL"
     gt_call = "0/1:15:12:352:3:126:-6.17418,0,-19.4464"
@@ -192,5 +191,23 @@ def test_freebays():
     assert freebayes_genotype.alt_depth == 3
     assert freebayes_genotype.ref_depth == 12
     
-
-    
+def test_vardict():
+    """
+    Test genotype call from vardict
+    """
+    fb_format = "GT:DP:VD:AD:RD:AF:BIAS:PMEAN:PSTD:QUAL:QSTD:SBF:ODDRATIO:MQ:SN:HIAF:ADJAF:NM"
+    gt_call = "0/1:192:4:3,1:77,110:0.0208:2,2:39.8:1:26:1:0.31065:4.25:60:3:0.0171:0:1.5"
+    gt_dict = dict(zip(fb_format.split(':'), gt_call.split(':')))
+    vardict_genotype = Genotype(**gt_dict)
+    assert vardict_genotype.genotype == '0/1'# If asked about the genotype, it should still be on the same form.
+    assert vardict_genotype.heterozygote
+    assert not vardict_genotype.homo_ref
+    assert not vardict_genotype.homo_alt
+    assert vardict_genotype.has_variant
+    assert vardict_genotype.allele_1 == '0'# If asked about the genotype, it should still be on the same form.
+    assert vardict_genotype.allele_2 == '1'# If asked about the genotype, it should still be on the same form.
+    assert vardict_genotype.genotyped
+    assert not vardict_genotype.phased
+    assert vardict_genotype.depth_of_coverage == 192
+    assert vardict_genotype.alt_depth == 4
+    assert vardict_genotype.ref_depth == 188

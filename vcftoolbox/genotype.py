@@ -81,8 +81,6 @@ class Genotype(object):
                      Default '0'
             PL(str): The likelihoods for the different possible calls for this variant. 
                      Default None
-            PL(str): The likelihoods for the different possible calls for this variant. 
-                     Default None
             SU(str): Number of pieces of evidence supporting the variant
             PE(str): Number of paired-end reads supporting the variant
             SR(str): Number of split reads supporting the variant
@@ -93,7 +91,7 @@ class Genotype(object):
         AD = kwargs.get('AD', '.,.')
         DP = kwargs.get('DP', '0')
         GQ = kwargs.get('GQ', '0')
-        PL = kwargs.get('PL', None)
+        PL = kwargs.get('PL')
         SU = kwargs.get('SU', '0')
         PE = kwargs.get('PE', '0')
         SR = kwargs.get('SR', '0')
@@ -101,6 +99,8 @@ class Genotype(object):
         RO = kwargs.get('RO')
         #Alternative allele observations(used by freebays for example)
         AO = kwargs.get('AO')
+        #Alternative allele observations(used by vardict for example)
+        VD = kwargs.get('VD')
         
         self.heterozygote = False
         self.allele_depth = False
@@ -143,29 +143,36 @@ class Genotype(object):
             else:
                 self.heterozygote = True
                 self.has_variant = True
+        #Check the depth of coverage:
+        try:
+            self.depth_of_coverage = int(DP)
+        except ValueError:
+            self.depth_of_coverage = 0
         #Check the allele depth:
         self.ref_depth = 0
         self.alt_depth = 0
         
+        # Freebayes specific
         if RO and RO != '.':
             self.ref_depth = int(RO)
         if AO and AO != '.':
             self.alt_depth = int(AO)
         
-        allele_depths = AD.split(',')
+        # Vardict specific
+        elif VD and VD != '.':
+            self.alt_depth = int(VD)
+            self.ref_depth = self.depth_of_coverage - self.alt_depth
         
-        if len(allele_depths) > 1:
-            if allele_depths[0].isdigit():
-                self.ref_depth = int(allele_depths[0])
-            if allele_depths[1].isdigit():
-                self.alt_depth = int(allele_depths[1])
+        else:
+            allele_depths = AD.split(',')
+            
+            if len(allele_depths) > 1:
+                if allele_depths[0].isdigit():
+                    self.ref_depth = int(allele_depths[0])
+                if allele_depths[1].isdigit():
+                    self.alt_depth = int(allele_depths[1])
         
         self.quality_depth = self.ref_depth + self.alt_depth
-        #Check the depth of coverage:
-        try:
-            self.depth_of_coverage = int(DP)
-        except ValueError:
-            pass
         #Check the genotype quality
         try:
             self.genotype_quality = float(GQ)
