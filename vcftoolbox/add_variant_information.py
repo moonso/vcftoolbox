@@ -150,8 +150,6 @@ def add_vcf_info(keyword, variant_line=None, variant_dict=None, annotation=None)
     Returns:
         fixed_variant : str if variant line, or dict if variant_dict
     """
-    logger = logging.getLogger(__name__)
-    
     if annotation:
         new_info = '{0}={1}'.format(keyword, annotation)
     else:
@@ -164,10 +162,11 @@ def add_vcf_info(keyword, variant_line=None, variant_dict=None, annotation=None)
     if variant_line:
         logger.debug("Adding information to a variant line")
         splitted_variant = variant_line.rstrip('\n').split('\t')
-        logger.debug("Adding information to splitted variant line")
         old_info = splitted_variant[7]
+        # If there is no info we replace the information
         if old_info == '.':
             splitted_variant[7] = new_info
+        # Else we append the new information to the old
         else:
             splitted_variant[7] = "{0};{1}".format(splitted_variant[7], new_info)
         
