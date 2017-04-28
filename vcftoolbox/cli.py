@@ -9,6 +9,10 @@ import click
 
 from . import (get_vcf_handle, HeaderParser, print_headers, remove_vcf_info,
 print_variant, get_variant_dict, get_info_dict, get_snpeff_info, sort_variants)
+
+from vcftoolbox.utils.range import get_range
+from vcftoolbox.utils.helpers import zipped, indexed
+
 from .log import LEVELS, configure_stream
 
 logger = logging.getLogger(__name__)
@@ -35,11 +39,13 @@ def cli(ctx, vcf, verbose, outfile, silent):
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
     configure_stream(level=loglevel)
+    ctx.path = None
     
     if vcf == '-':
         handle = get_vcf_handle(fsock=sys.stdin)
     else:
         handle = get_vcf_handle(infile=vcf)
+        ctx.path = vcf
     
     head = HeaderParser()
     for line in handle:
@@ -52,6 +58,7 @@ def cli(ctx, vcf, verbose, outfile, silent):
         else:
             break
     ctx.head = head
+    
 
     ctx.handle = itertools.chain([line], handle)
     ctx.outfile = outfile
@@ -121,6 +128,42 @@ def variants(ctx, snpeff):
                     snpeff_string = snpeff_string,
                     snpeff_header = head.snpeff_columns
                 )
+
+@cli.command()
+@click.pass_context
+@click.option('-c', '--chrom',
+    help="Specify what chromosome to look for",
+    required=True,
+)
+@click.option('-s', '--start',
+    type=int,
+    help="Specify start position",
+    required=True,
+)
+@click.option('-e', '--end',
+    type=int,
+    help="Specify end position",
+    required=True,
+)
+def region(ctx, chrom, start, end):
+    """Print all variants from a region of the vcf file"""
+    head = ctx.parent.head
+    vcf_handle = ctx.parent.handle
+    outfile = ctx.parent.outfile
+    silent = ctx.parent.silent
+    path = ctx.parent.path
+
+    file_name = os.path.abspath(path)
+    zipped_vcf = None
+    
+    handle = get_vcf_handle(infile=file_name)
+    if (zipped(file_name) and indexed(file_name)):
+        logger.info("Found zipped and indexed vcf!")
+        zipped_vcf = file_name
+
+    for line in get_range(handle, chrom, start, end, zipped_vcf=zipped_vcf):
+        click.echo(line)
+        
 
 @cli.command()
 @click.pass_context
